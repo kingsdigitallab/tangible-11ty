@@ -1,0 +1,18 @@
+{
+  "name": "tangible-test-server",
+  "version": "0.2",
+  "description": "For Tangible top codes",
+  "scripts": {
+    "build": "eleventy",
+    "watch": "eleventy --watch",
+    "serve": "eleventy --serve",
+    "debug": "DEBUG=* eleventy"
+  },
+  "dependencies": {
+    "@11ty/eleventy-img": "^2.0.1",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^1.0.2"
+  }
+}

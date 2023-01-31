@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Tangible Programming test: Row Row Row</title>
+  <link rel="stylesheet" href="{{ '/assets/css/w3.css' | url }}">
+
+  <style>
+  #video-canvas{
+  border: solid 1px blue;
+  background: #ddd;
+  width: 100%;
+}
+.resultWindow{
+width:100%;
+min-height:50px;
+border: solid 1px white;
+}
+  </style>
+  <script src="{{ '/assets/js/topcodes.js' | url }}"></script>
+
+
+</head>
+
+ <body class="w3-black">
+ <main>
+ <div class="w3-content w3-padding-32">
+ <div class="w3-row">
+ <div class="w3-col s1 m2 l2">&nbsp;</div>
+ <div class="w3-col s10 m8 l8">
+  <canvas id="video-canvas" width="800" height="600" ></canvas>
+  <br />
+  <button id="camera-button" onclick="TopCodes.startStopVideoScan('video-canvas')">Start / Stop</button>
+  </div>
+  </div>
+</div>
+<div class="w3-content">
+ <div class="w3-row">
+  <div id="output">
+  <h2>Result</h2>
+  <div id="result" class="resultWindow"></div>
+  </div>
+   <br/>
+   <div class="w3-row">
+
+  <h2>Debug</h2>
+  <div id="codes"></div>
+  </div>
+  </div>
+</div>
+
+<script defer type="module" src="{{ '/assets/js/main.js' | url }}"></script>
+
+
+
+</main>
+</body>
+
+</html>
