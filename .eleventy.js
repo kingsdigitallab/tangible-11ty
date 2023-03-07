@@ -5,6 +5,7 @@ module.exports = function (config) {
         dir: {
         input: "tangible",
             output:"_site"
-        }
+        },
+        pathPrefix: "/tangible-11ty/",
     }
 }
