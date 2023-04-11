@@ -87,7 +87,7 @@ export default class Tangible {
         let grid = this.sortTopCodesIntoGrid(topCodes);
         for (let i = 0; i < grid.length; i++) {
             for (let x = 0; x < grid[i].length; x++) {
-                outputString += this.codeLibrary[grid[i][x].code] + " ";
+                outputString += this.codeLibrary[grid[i][x].code] + ", X:"+grid[i][x];
             }
             outputString += "<br/>\n";
         }
