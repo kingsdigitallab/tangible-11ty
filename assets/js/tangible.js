@@ -1,57 +1,21 @@
 /*jshint esversion: 8 */
 
-/*
-Play = 31
-Delay = 47
-Loop = 55
-End Loop = 59
-0 = 103
-1 = 107
-2 = 109
-3 = 115
-4 = 117
-5 = 121
-6 = 143
-7 = 151
-8 = 155
-9 = 157
-A = 167
-B = 171
-C = 173
-D = 179
-E = 181
-F = 185
-G = 199
-H = 203
-I = 205
-J = 211
-K = 213
-L = 217
-M = 227
-N = 229
-O = 233
-P = 241
-Q = 271
-R = 279
-S = 283
-T = 285
-U = 295
-V = 299
-X = 301
-Y = 307
-Z = 309
 
- */
 export default class Tangible {
 
     constructor() {
+        this.commands = {
+            "LOOP": "Loop",
+            "ENDLOOP": "End Loop",
+            "PLAY": "Play",
+        };
         // Code library for translations
         // Will be made into its getter/setter
         this.codeLibrary = {
-            31:"Play",
+            31: this.commands.PLAY,
             47: "Delay",
-            55: "Loop",
-            59: "End Loop",
+            55: this.commands.LOOP,
+            59: this.commands.ENDLOOP,
             103: "0",
             107: "1",
             109: "2",
@@ -89,7 +53,17 @@ export default class Tangible {
             309: "Y",
             313: "Z",
         };
+        this.topcodeHeight = 40;
+        this.topcodeWidth = 100;
+        this.variableIncrementer = 0;
 
+        this.declarations = "let sounds = {"+
+            "\"A\": new Audio(\"/tangible-11ty/assets/sound/A.wav\"),"+
+            "\"B\": new Audio(\"/tangible-11ty/assets/sound/B.wav\"),"+
+            "\"C\": new Audio(\"/tangible-11ty/assets/sound/C.wav\")"+
+        "};\n";
+        // Codes currently seen
+        this.currentCodes = [];
     }
 
     /**
@@ -102,7 +76,6 @@ export default class Tangible {
     }
 
 
-
     /**
      Parse the topcodes that are found.  Each item in the array topCodes has:
      x,y coordinates found and code: the int of topcode
@@ -111,14 +84,135 @@ export default class Tangible {
      */
     parseCodesAsText(topCodes) {
         let outputString = "";
-        for (let i = 0; i < topCodes.length; i++) {
-            if (topCodes[i].code in this.codeLibrary){
-                outputString += this.codeLibrary[topCodes[i].code] + " ";
+        let grid = this.sortTopCodesIntoGrid(topCodes);
+        for (let i = 0; i < grid.length; i++) {
+            for (let x = 0; x < grid[i].length; x++) {
+                outputString += this.codeLibrary[grid[i][x].code] + " ";
             }
+            outputString += "<br/>\n";
         }
+
         return outputString;
     }
 
+    /** Sort topcodes into a grid using x,y coordinates
+     *
+     * @param topCodes to sort
+     * @return multi-dimensional grid array
+     */
+    sortTopCodesIntoGrid(topCodes) {
+        // Sort topcodes by y, then x
+        //topCodes.sort(this.sortTopCodeComparator.bind(this));
+        console.log(topCodes);
+        let grid = [];
+        let line = Array();
+        let currentY = -1;
+        // loop through, add lines as y changes
+        for (let i = 0; i < topCodes.length; i++) {
+            if (currentY >= 0 && topCodes[i].y - currentY >= this.topcodeHeight) {
+                // New line
+                grid.push(line);
+                line = Array();
+                currentY = topCodes[i].y;
+            } else if (currentY < 0) {
+                currentY = topCodes[i].y;
+            }
+            line.push(topCodes[i]);
+        }
+        // Add last line and return
+        grid.push(line);
+        return grid;
+    }
+
+    /*sortTopCodeComparator(a, b){
+        // Different lines
+        if (a.y - b.y <= this.topcodeHeight * -1 ){
+            return -1;
+        }
+        if (a.y - b.y <= this.topcodeHeight){
+            return 1;
+        }
+        if (a.x == b.x){
+            return 0;
+        }
+        // in line
+        if (a.x < b.x){
+            return -1;
+        }
+        return 1;
+    }*/
+
+    /**
+     Parse topcodes as javascript.  Each item in the array topCodes has:
+     x,y coordinates found and code: the int of topcode
+     @param topCodes Found codes
+     @return text translations of code
+     */
+    parseCodesAsJavascript(topCodes) {
+
+        let outputJS = "";
+        let grid = this.sortTopCodesIntoGrid(topCodes);
+        console.log(grid);
+        for (let i = 0; i < grid.length; i++) {
+            outputJS += this.parseTopCodeLine(grid[i]);
+        }
+        /*for (let i = 0; i < topCodes.length; i++) {
+            if (topCodes[i].code in this.codeLibrary){
+                outputJS += this.codeLibrary[topCodes[i].code] + " ";
+
+            }
+        }*/
+        return outputJS;
+    }
+
+
+    parseTopCodeLine(line) {
+        //this.codeLibrary[grid[i][x].code]
+        let lineJS = "\n";
+        let i = 0;
+        while (i < line.length) {
+            let parsedCode = this.codeLibrary[line[i].code];
+            console.log(parsedCode);
+            switch (parsedCode) {
+                case this.commands.LOOP:
+                    // See if we've got a number next
+                    if (line.length > i + 1) {
+                        let nextSymbol = this.codeLibrary[line[i + 1].code];
+                        if (parseInt(nextSymbol)) {
+                            lineJS += "for (let x" + this.variableIncrementer + "=0; x" + this.variableIncrementer + " < " + nextSymbol + "; x" + this.variableIncrementer + "++){";
+                            this.variableIncrementer += 1;
+                            i += 1;
+                        }
+                    } else {
+                        console.log("ERROR: No increment or bad increment for for loop!");
+                    }
+                    break;
+                case this.commands.ENDLOOP:
+                    lineJS += "} \n";
+                    break;
+                case this.commands.PLAY:
+                    if (line.length > i + 1) {
+                        let letter = this.codeLibrary[line[i + 1].code];
+                        lineJS += "sounds." + letter + ".play();\n";
+                    }
+                    lineJS += "";
+                    break;
+
+            }
+            i += 1;
+        }
+        return lineJS;
+    }
+
+    runCode() {
+        if (this.currentCodes && this.currentCodes.length > 0) {
+            let parsedJS = this.declarations + this.parseCodesAsJavascript(this.currentCodes);
+            console.log(parsedJS);
+            document.getElementById("codes").innerHTML = this.parseCodesAsText(this.currentCodes);
+            document.getElementById("result").innerHTML = parsedJS;
+            eval(parsedJS);
+        }
+    }
 
     setupTangible() {
         this.setVideoCanvasHeight('video-canvas');
@@ -145,11 +239,17 @@ export default class Tangible {
                 //document.querySelector("#result").innerHTML += '<br/>' + topcodes[i].code + ', x:' + topcodes[i].x + ', y:' + topcodes[i].y;
             }
 
-                document.querySelector("#result").innerHTML = tangible.parseCodesAsText(topcodes);
-                tangible.once = true;
+            //document.querySelector("#result").innerHTML = tangible.parseCodesAsText(topcodes);
+            tangible.currentCodes = topcodes;
+            tangible.once = true;
 
 
         }, this);
+
+        // Setup buttons
+        console.log(document.getElementById('run'));
+        let runButton = document.getElementById('run');
+        runButton.onclick = function(){this.runCode();}.bind(this);
     }
 
 }

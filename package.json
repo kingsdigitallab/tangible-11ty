@@ -11,9 +11,10 @@
   },
   "dependencies": {
     "@11ty/eleventy-img": "^2.0.1",
+    "blockly": "^9.3.2",
     "express": "^4.18.2"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^1.0.2"
+    "@11ty/eleventy": "^2.0.1"
   }
 }
