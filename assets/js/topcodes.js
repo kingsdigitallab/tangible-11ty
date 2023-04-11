@@ -8051,10 +8051,6 @@ var TopCodes = {
         var canvas = document.querySelector("#" + canvasId);
         var ctx = canvas.getContext('2d');
         var video = document.querySelector("#" + canvasId + "-video");
-        video.addEventListener('loadedmetadata', function () {
-            ctx.translate(video.videoWidth, 0);
-            ctx.scale(-1, 1);
-        });
         if (canvas && video) {
             var vw = parseInt(canvas.getAttribute('width'));
             var vh = parseInt(canvas.getAttribute('height'));
