@@ -9,9 +9,8 @@
   #video-canvas{
   border: solid 1px blue;
   background: #ddd;
-  width: 100%;
-
-
+   transform: scale(-1, 1);            /*For Firefox (& IE) */
+        -webkit-transform: scale(-1, 1);     /*for Chrome & Opera (& Safari) */
 }
 .resultWindow{
 width:100%;
