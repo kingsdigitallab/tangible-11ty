@@ -124,6 +124,13 @@ export default class Tangible {
         return grid;
     }
 
+    /**
+     * Sort the top codes y ascending
+     * X DESCENDING because the video is mirrorer
+     * @param a
+     * @param b
+     * @return {number}
+     */
     sortTopCodeComparator(a, b){
 
         if (Math.abs(a.y - b.y) <= this.topcodeHeight){
@@ -132,9 +139,9 @@ export default class Tangible {
                 return 0;
             }
             if (a.x < b.x){
-                return -1;
+                return 1;
             }
-            return 1;
+            return -1;
         }
         // Different lines
         if (a.y < b.y){
