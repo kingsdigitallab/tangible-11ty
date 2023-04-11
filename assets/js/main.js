@@ -23,6 +23,8 @@ let tangible = new Tangible();
 tangible.setupTangible();
 if (getUrlParameter("demo")) {
     let testCodes = [
+         {"code": 173, x: 300, y: 450},
+        {"code": 59, x: 100, y: 500},
         {"code": 55, x: 100, y: 200},
         {"code": 109, x: 200, y: 200},
         {"code": 31, x: 200, y: 250},
@@ -32,9 +34,8 @@ if (getUrlParameter("demo")) {
         {"code": 31, x: 200, y: 350},
         {"code": 171, x: 300, y: 350},
         {"code": 59, x: 200, y: 400},
-        {"code": 31, x: 200, y: 450},
-        {"code": 173, x: 300, y: 450},
-        {"code": 59, x: 100, y: 500}
+        {"code": 31, x: 200, y: 450}
     ];
+
     tangible.currentCodes = testCodes;
 }

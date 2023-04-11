@@ -102,7 +102,7 @@ export default class Tangible {
      */
     sortTopCodesIntoGrid(topCodes) {
         // Sort topcodes by y, then x
-        //topCodes.sort(this.sortTopCodeComparator.bind(this));
+        topCodes.sort(this.sortTopCodeComparator.bind(this));
         console.log(topCodes);
         let grid = [];
         let line = Array();
@@ -124,23 +124,24 @@ export default class Tangible {
         return grid;
     }
 
-    /*sortTopCodeComparator(a, b){
-        // Different lines
-        if (a.y - b.y <= this.topcodeHeight * -1 ){
-            return -1;
-        }
-        if (a.y - b.y <= this.topcodeHeight){
+    sortTopCodeComparator(a, b){
+
+        if (Math.abs(a.y - b.y) <= this.topcodeHeight){
+            // same line
+            if (a.x == b.x){
+                return 0;
+            }
+            if (a.x < b.x){
+                return -1;
+            }
             return 1;
         }
-        if (a.x == b.x){
-            return 0;
-        }
-        // in line
-        if (a.x < b.x){
+        // Different lines
+        if (a.y < b.y){
             return -1;
         }
         return 1;
-    }*/
+    }
 
     /**
      Parse topcodes as javascript.  Each item in the array topCodes has:
