@@ -8059,7 +8059,7 @@ var TopCodes = {
             var vc = {
                 // EH I've changed this to use updated API
                 audio: false, video: {
-                    facingMode: "environment",
+                    facingMode: "user",
                     width: vw,
                     height: vh
                     //facingMode: 'environment',
