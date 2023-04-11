@@ -227,8 +227,6 @@ export default class Tangible {
             var topcodes = json.topcodes;
             // obtain a drawing context from the <canvas>
             var ctx = document.querySelector("#video-canvas").getContext('2d');
-            ctx.translate(ctx.width, 0);
-            ctx.scale(-1, 1);
             // draw a circle over the top of each TopCode
             document.querySelector("#codes").innerHTML = '';
             ctx.fillStyle = "rgba(255, 0, 0, 0.3)";   // very translucent red
