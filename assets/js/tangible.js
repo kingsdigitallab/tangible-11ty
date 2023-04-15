@@ -233,7 +233,7 @@ export default class Tangible {
 
     async evalTile(tileCode, context) {
 
-        eval?.('(async (context) => {"use strict";' + tileCode + '})(context)');
+        eval('(async (context) => {"use strict";' + tileCode + '})(context)');
         return true;
     }
 
