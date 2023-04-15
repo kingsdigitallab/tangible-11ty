@@ -57,13 +57,29 @@ export default class Tangible {
         this.topcodeWidth = 100;
         this.variableIncrementer = 0;
 
-        this.declarations = "let sounds = {"+
-            "\"A\": new Audio(\"/tangible-11ty/assets/sound/A.wav\"),"+
-            "\"B\": new Audio(\"/tangible-11ty/assets/sound/B.wav\"),"+
-            "\"C\": new Audio(\"/tangible-11ty/assets/sound/C.wav\")"+
-        "};\n";
+        this.declarations = "";
         // Codes currently seen
         this.currentCodes = [];
+    }
+
+    /** Loads assets and data for this set of tiles
+     *
+     *
+     */
+    preloads() {
+        this.sounds = {
+            "A": new Audio("/tangible-11ty/assets/sound/A.wav"),
+            "B": new Audio("/tangible-11ty/assets/sound/B.wav"),
+            "C": new Audio("/tangible-11ty/assets/sound/C.wav")
+        };
+
+    }
+
+    playAudio(audio) {
+        return new Promise(res => {
+            audio.play();
+            audio.onended = res;
+        });
     }
 
     /**
@@ -87,7 +103,7 @@ export default class Tangible {
         let grid = this.sortTopCodesIntoGrid(topCodes);
         for (let i = 0; i < grid.length; i++) {
             for (let x = 0; x < grid[i].length; x++) {
-                outputString += this.codeLibrary[grid[i][x].code] + ", X:"+grid[i][x];
+                outputString += this.codeLibrary[grid[i][x].code] + ", X:" + grid[i][x];
             }
             outputString += "<br/>\n";
         }
@@ -103,7 +119,7 @@ export default class Tangible {
     sortTopCodesIntoGrid(topCodes) {
         // Sort topcodes by y, then x
         topCodes.sort(this.sortTopCodeComparator.bind(this));
-        console.log(topCodes);
+        //console.log(topCodes);
         let grid = [];
         let line = Array();
         let currentY = -1;
@@ -131,20 +147,20 @@ export default class Tangible {
      * @param b
      * @return {number}
      */
-    sortTopCodeComparator(a, b){
+    sortTopCodeComparator(a, b) {
 
-        if (Math.abs(a.y - b.y) <= this.topcodeHeight){
+        if (Math.abs(a.y - b.y) <= this.topcodeHeight) {
             // same line
-            if (a.x == b.x){
+            if (a.x == b.x) {
                 return 0;
             }
-            if (a.x < b.x){
+            if (a.x < b.x) {
                 return 1;
             }
             return -1;
         }
         // Different lines
-        if (a.y < b.y){
+        if (a.y < b.y) {
             return -1;
         }
         return 1;
@@ -160,7 +176,7 @@ export default class Tangible {
 
         let outputJS = "";
         let grid = this.sortTopCodesIntoGrid(topCodes);
-        console.log(grid);
+        //console.log(grid);
         for (let i = 0; i < grid.length; i++) {
             outputJS += this.parseTopCodeLine(grid[i]);
         }
@@ -180,7 +196,7 @@ export default class Tangible {
         let i = 0;
         while (i < line.length) {
             let parsedCode = this.codeLibrary[line[i].code];
-            console.log(parsedCode);
+            //console.log(parsedCode);
             switch (parsedCode) {
                 case this.commands.LOOP:
                     // See if we've got a number next
@@ -192,7 +208,7 @@ export default class Tangible {
                             i += 1;
                         }
                     } else {
-                        console.log("ERROR: No increment or bad increment for for loop!");
+                        //console.log("ERROR: No increment or bad increment for for loop!");
                     }
                     break;
                 case this.commands.ENDLOOP:
@@ -201,7 +217,8 @@ export default class Tangible {
                 case this.commands.PLAY:
                     if (line.length > i + 1) {
                         let letter = this.codeLibrary[line[i + 1].code];
-                        lineJS += "sounds." + letter + ".play();\n";
+                        lineJS += "await context.playAudio(this.sounds." + letter + ");\n";
+                        //lineJS += "await new Promise(r => setTimeout(resolve, this.sounds." + letter + ".duration * 100));";
                     }
                     lineJS += "";
                     break;
@@ -212,13 +229,25 @@ export default class Tangible {
         return lineJS;
     }
 
-    runCode() {
+    // await new Promise(resolve => setTimeout(resolve, 1500));
+
+    async evalTile(tileCode, context) {
+
+        eval?.('(async (context) => {"use strict";' + tileCode + '})(context)');
+        return true;
+    }
+
+
+    async runCode() {
         if (this.currentCodes && this.currentCodes.length > 0) {
             let parsedJS = this.declarations + this.parseCodesAsJavascript(this.currentCodes);
-            console.log(parsedJS);
+            //console.log(parsedJS);
             document.getElementById("codes").innerHTML = this.parseCodesAsText(this.currentCodes);
             document.getElementById("result").innerHTML = parsedJS;
-            eval(parsedJS);
+            //parsedJS = "await this.playAudio(this.sounds.A); await this.playAudio(this.sounds.B); return true";
+            let parsedLines = [];
+            parsedLines.push(this.evalTile(parsedJS, this));
+            let done = await Promise.all(parsedLines);
         }
     }
 
@@ -255,9 +284,14 @@ export default class Tangible {
         }, this);
 
         // Setup buttons
-        console.log(document.getElementById('run'));
+        //console.log(document.getElementById('run'));
         let runButton = document.getElementById('run');
-        runButton.onclick = function(){this.runCode();}.bind(this);
+        runButton.onclick = function () {
+            this.runCode();
+        }.bind(this);
+
+        // Run preloads
+        this.preloads();
     }
 
 }
