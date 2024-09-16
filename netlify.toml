@@ -1,0 +1,9 @@
+[build]
+  publish = "_site"
+  command = "DEBUG=* eleventy"
+
+# Redirect with a 302 from real home on yarlis
+[[redirects]]
+from = "/tangible-11ty/*"
+to = "/:splat"
+status = 301
