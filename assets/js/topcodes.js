@@ -8036,14 +8036,14 @@
 var TopCodes = {
 
 
-    startStopVideoScan: function (canvasId) {
+    startStopVideoScan: function (canvasId, facingMode) {
         TopCodes._mediaStreams[canvasId] ?
             TopCodes.stopVideoScan(canvasId) :
-            TopCodes.startVideoScan(canvasId);
+            TopCodes.startVideoScan(canvasId, facingMode);
     },
 
 
-    startVideoScan: function (canvasId) {
+    startVideoScan: function (canvasId, facingMode) {
         // initialize the video scanner if necessary
         if (!(canvasId in TopCodes._mediaStreams)) {
             topcodes_initVideoScanner(canvasId);
@@ -8059,7 +8059,7 @@ var TopCodes = {
             var vc = {
                 // EH I've changed this to use updated API
                 audio: false, video: {
-                    facingMode: "user",
+                    facingMode: facingMode,
                     width: vw,
                     height: vh
                     //facingMode: 'environment',

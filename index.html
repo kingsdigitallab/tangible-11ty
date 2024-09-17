@@ -17,8 +17,12 @@ width:100%;
 min-height:50px;
 border: solid 1px white;
 }
+button, select {
+    font-size: 150%;
+}
   </style>
   <script src="/tangible-11ty/assets/js/topcodes.js"></script>
+<script defer type="module" src="/tangible-11ty/assets/js/main.js"></script>
 
 
 </head>
@@ -30,8 +34,24 @@ border: solid 1px white;
  <div class="w3-col s1 m2 l2">&nbsp;</div>
  <div class="w3-col s10 m8 l8">
   <canvas id="video-canvas" width="600" height="800" ></canvas>
-  <br />
-  <button id="camera-button" onclick="TopCodes.startStopVideoScan('video-canvas')">Start / Stop</button>
+ </div>
+ </div>
+ <div class="w3-row-padding">
+   <div class="w3-col s0 m2 l1 w3-hide-small">&nbsp;</div>
+ <div class="w3-col s12 m10 l10">
+  <button id="camera-button">Start / Stop and capture</button>
+  <button id="camera-switch">Switch camera</button>
+  <button id="run" type="button">Run program</button>
+  </div>
+   <div class="w3-col s0 m2 l1 w3-hide-small">&nbsp;</div>
+ <div class="w3-col s12 m10 l10">
+  <label for="soundlibrary">Sound library:</label>
+  <select id="soundlibrary">
+  <option value="DEFAULT">default</option>
+  <option value="REVERSED">reversed</option>
+  </select>
+  </div>
+  </div>
   </div>
   </div>
 </div>
@@ -50,11 +70,10 @@ border: solid 1px white;
   </div>
   <br/>
   <div class="w3-row">
-    <button id="run" type="button" >Run</button>
+
    </div>
 </div>
 
-<script defer type="module" src="/tangible-11ty/assets/js/main.js"></script>
 
 
 </main>

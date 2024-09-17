@@ -21,6 +21,12 @@ function getUrlParameter(sParam) {
 let tangible = new Tangible();
 
 tangible.setupTangible();
+
+let facingMode = getUrlParameter("facingMode");
+if (facingMode) {
+
+}
+
 if (getUrlParameter("demo")) {
     let testCodes = [
         {"code": 55, x: 400, y: 200},
