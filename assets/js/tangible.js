@@ -374,13 +374,14 @@ export default class Tangible {
         //camera-switch
         let cameraSwitchButton = document.getElementById('camera-switch');
         cameraSwitchButton.onclick = function () {
+            TopCodes.stopVideoScan(this.canvasId);
             // swap the facing mode
             if (this.facingMode == "user") {
                 this.facingMode = "environment";
             } else {
                 this.facingMode = "user";
             }
-            TopCodes.startStopVideoScan(this.canvasId, this.facingMode);
+            TopCodes.startVideoScan(this.canvasId, this.facingMode);
         }.bind(this);
 
         // Run preloads
