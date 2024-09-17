@@ -3,12 +3,51 @@
 
 export default class Tangible {
 
-    constructor() {
+    // todo Gather all the ids into selector consts here for hygiene
+    constructor(topCodes, facingMode) {
         this.commands = {
             "LOOP": "Loop",
             "ENDLOOP": "End Loop",
             "PLAY": "Play",
         };
+        // Set the sounds default url here
+        this.libraryUrlPrefix = "/tangible-11ty/assets/sound/";
+        // Sound libraries are loaded with the loadsoundlibrary command
+        // todo populate select based on these libraries so they are in sync
+        this.soundLibraries = {
+            "DEFAULT": {
+                "A": this.libraryUrlPrefix + "A.wav",
+                "B": this.libraryUrlPrefix + "B.wav",
+                "C": this.libraryUrlPrefix + "C.wav",
+            },
+            // Silly just to show an example
+            "REVERSED": {
+                "A": this.libraryUrlPrefix + "C.wav",
+                "B": this.libraryUrlPrefix + "B.wav",
+                "C": this.libraryUrlPrefix + "A.wav",
+            }
+        };
+        // todo set loaded library with get variables to make preloading easier
+        this.currentSoundLibrary = this.soundLibraries.DEFAULT;
+
+        this.testCodes = [
+            {"code": 55, x: 400, y: 200},
+            {"code": 109, x: 300, y: 200},
+
+            {"code": 31, x: 300, y: 250},
+            {"code": 167, x: 200, y: 250},
+
+            {"code": 55, x: 300, y: 300},
+            {"code": 109, x: 200, y: 300},
+
+            {"code": 31, x: 300, y: 350},
+            {"code": 171, x: 250, y: 350},
+
+            {"code": 59, x: 300, y: 400},
+            {"code": 31, x: 400, y: 450},
+            {"code": 173, x: 300, y: 450},
+            {"code": 59, x: 400, y: 500},
+        ];
         // Code library for translations
         // Will be made into its getter/setter
         this.codeLibrary = {
@@ -56,10 +95,22 @@ export default class Tangible {
         this.topcodeHeight = 40;
         this.topcodeWidth = 100;
         this.variableIncrementer = 0;
-
         this.declarations = "";
+        this.facingMode = "user";
+        this.canvasId = "video-canvas";
+        this.videoRunning = false;
         // Codes currently seen
         this.currentCodes = [];
+
+
+    }
+
+    // Load the current sound library into memory
+    loadSounds() {
+        this.sounds = {};
+        for (const [key, value] of Object.entries(this.currentSoundLibrary)) {
+            this.sounds[key] = new Audio(value);
+        }
     }
 
     /** Loads assets and data for this set of tiles
@@ -67,11 +118,7 @@ export default class Tangible {
      *
      */
     preloads() {
-        this.sounds = {
-            "A": new Audio("/tangible-11ty/assets/sound/A.wav"),
-            "B": new Audio("/tangible-11ty/assets/sound/B.wav"),
-            "C": new Audio("/tangible-11ty/assets/sound/C.wav")
-        };
+        this.loadSounds();
 
     }
 
@@ -180,12 +227,7 @@ export default class Tangible {
         for (let i = 0; i < grid.length; i++) {
             outputJS += this.parseTopCodeLine(grid[i]);
         }
-        /*for (let i = 0; i < topCodes.length; i++) {
-            if (topCodes[i].code in this.codeLibrary){
-                outputJS += this.codeLibrary[topCodes[i].code] + " ";
 
-            }
-        }*/
         return outputJS;
     }
 
@@ -237,57 +279,108 @@ export default class Tangible {
         return true;
     }
 
+    parseTopCodes() {
+        this.currentCodes = this.testCodes;
+        if (this.currentCodes.length > 0) {
+            console.log('parsed');
+            let codeText = this.parseCodesAsText(this.currentCodes)
+            this.parsedJS = this.declarations + this.parseCodesAsJavascript(this.currentCodes);
+            document.getElementById("codes").innerHTML = codeText;
+            document.getElementById("result").innerHTML = this.parsedJS;
+
+        }
+    }
 
     async runCode() {
-        if (this.currentCodes && this.currentCodes.length > 0) {
-            let parsedJS = this.declarations + this.parseCodesAsJavascript(this.currentCodes);
-            //console.log(parsedJS);
-            document.getElementById("codes").innerHTML = this.parseCodesAsText(this.currentCodes);
-            document.getElementById("result").innerHTML = parsedJS;
+        console.log(this.currentCodes);
+        if (this.parsedJS.length > 0) {
             //parsedJS = "await this.playAudio(this.sounds.A); await this.playAudio(this.sounds.B); return true";
             let parsedLines = [];
-            parsedLines.push(this.evalTile(parsedJS, this));
+            parsedLines.push(this.evalTile(this.parsedJS, this));
             let done = await Promise.all(parsedLines);
         }
     }
 
+    toggleSoundLibrary() {
+
+        let soundLibraryToggle = document.getElementById('soundlibrary');
+        if (soundLibraryToggle) {
+            let selectedLibrary = soundLibraryToggle.value;
+            //console.log(selectedLibrary);
+            for (const [key, value] of Object.entries(this.soundLibraries)) {
+                if (selectedLibrary == key){
+                    console.log('sound library toggle to ' + key);
+                    this.currentSoundLibrary = value;
+                    this.loadSounds();
+                    break;
+                }
+            }
+        }
+
+    }
+
     setupTangible() {
-        this.setVideoCanvasHeight('video-canvas');
-        let tangible = this;
+        this.setVideoCanvasHeight(this.canvasId);
 
         // register a callback function with the TopCode library
-        TopCodes.setVideoFrameCallback("video-canvas", function (jsonString) {
+        TopCodes.setVideoFrameCallback(this.canvasId, function (jsonString) {
             // convert the JSON string to an object
             var json = JSON.parse(jsonString);
             // get the list of topcodes from the JSON object
-            var topcodes = json.topcodes;
+            let codes = json.topcodes;
             // obtain a drawing context from the <canvas>
-            var ctx = document.querySelector("#video-canvas").getContext('2d');
+            let ctx = document.querySelector("#" + this.canvasId).getContext('2d');
             // draw a circle over the top of each TopCode
-            document.querySelector("#codes").innerHTML = '';
+
             ctx.fillStyle = "rgba(255, 0, 0, 0.3)";   // very translucent red
-            for (let i = 0; i < topcodes.length; i++) {
+            for (let i = 0; i < codes.length; i++) {
                 ctx.beginPath();
-                ctx.arc(topcodes[i].x, topcodes[i].y, topcodes[i].radius, 0, Math.PI * 2, true);
+                ctx.arc(codes[i].x, codes[i].y, codes[i].radius, 0, Math.PI * 2, true);
                 ctx.fill();
                 ctx.font = "26px Arial";
-                ctx.fillText(topcodes[i].code, topcodes[i].x, topcodes[i].y);
-                //console.log(topcodes[i].code +', x:'+topcodes[i].x, topcodes[i].y)
-                //document.querySelector("#result").innerHTML += '<br/>' + topcodes[i].code + ', x:' + topcodes[i].x + ', y:' + topcodes[i].y;
+                ctx.fillText(codes[i].code, codes[i].x, codes[i].y);
             }
 
-            //document.querySelector("#result").innerHTML = tangible.parseCodesAsText(topcodes);
-            tangible.currentCodes = topcodes;
-            tangible.once = true;
-
-
-        }, this);
+            this.currentCodes = codes;
+            this.once = true;
+        }.bind(this), this);
 
         // Setup buttons
-        //console.log(document.getElementById('run'));
+
+        // Run the code
         let runButton = document.getElementById('run');
         runButton.onclick = function () {
             this.runCode();
+        }.bind(this);
+
+        // Start/stop camera
+        let startStopButton = document.getElementById('camera-button');
+        startStopButton.onclick = function () {
+            if (this.videoRunning) {
+                TopCodes.stopVideoScan(this.canvasId)
+                this.parseTopCodes();
+                this.videoRunning = false;
+            } else {
+                TopCodes.startVideoScan(this.canvasId, this.facingMode);
+                this.videoRunning = true;
+            }
+
+
+        }.bind(this);
+
+        let soundLibraryToggle = document.getElementById('soundlibrary');
+        soundLibraryToggle.onchange = this.toggleSoundLibrary.bind(this);
+
+        //camera-switch
+        let cameraSwitchButton = document.getElementById('camera-switch');
+        cameraSwitchButton.onclick = function () {
+            // swap the facing mode
+            if (this.facingMode == "user") {
+                this.facingMode = "environment";
+            } else {
+                this.facingMode = "user";
+            }
+            TopCodes.startStopVideoScan(this.canvasId, this.facingMode);
         }.bind(this);
 
         // Run preloads
