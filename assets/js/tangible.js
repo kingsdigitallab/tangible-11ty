@@ -138,6 +138,18 @@ export default class Tangible {
         canvas.height = canvas.width * heightRatio;
     }
 
+    async switchCamera() {
+        TopCodes.startStopVideoScan(this.canvasId, this.facingMode);
+        // swap the facing mode
+        if (this.facingMode == "user") {
+            this.facingMode = "environment";
+        } else {
+            this.facingMode = "user";
+        }
+        await this.sleep(500);
+        TopCodes.startStopVideoScan(this.canvasId, this.facingMode);
+    }
+
 
     /**
      Parse the topcodes that are found.  Each item in the array topCodes has:
@@ -308,7 +320,7 @@ export default class Tangible {
             let selectedLibrary = soundLibraryToggle.value;
             //console.log(selectedLibrary);
             for (const [key, value] of Object.entries(this.soundLibraries)) {
-                if (selectedLibrary == key){
+                if (selectedLibrary == key) {
                     console.log('sound library toggle to ' + key);
                     this.currentSoundLibrary = value;
                     this.loadSounds();
@@ -317,6 +329,10 @@ export default class Tangible {
             }
         }
 
+    }
+
+    sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     setupTangible() {
@@ -373,16 +389,7 @@ export default class Tangible {
 
         //camera-switch
         let cameraSwitchButton = document.getElementById('camera-switch');
-        cameraSwitchButton.onclick = function () {
-            TopCodes.stopVideoScan(this.canvasId);
-            // swap the facing mode
-            if (this.facingMode == "user") {
-                this.facingMode = "environment";
-            } else {
-                this.facingMode = "user";
-            }
-            TopCodes.startVideoScan(this.canvasId, this.facingMode);
-        }.bind(this);
+        cameraSwitchButton.onclick = this.switchCamera.bind(this);
 
         // Run preloads
         this.preloads();
